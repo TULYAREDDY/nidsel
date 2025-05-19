@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Advanced IDS ML Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
@@ -245,6 +246,47 @@
             height: 100px;
             margin: 20px 0;
             position: relative;
+        }
+        .technical-details {
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            margin-top: 10px;
+        }
+        
+        .technical-details pre {
+            margin: 0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-size: 12px;
+            font-family: monospace;
+            color: #333;
+        }
+        
+        .details-btn {
+            width: 100%;
+            text-align: left;
+            padding: 10px;
+            background: #f1f1f1;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+        
+        .details-btn:hover {
+            background: #e9ecef;
+        }
+        
+        .details-btn::after {
+            content: '▼';
+            float: right;
+            transform: rotate(0deg);
+            transition: transform 0.3s ease;
+        }
+        
+        .details-btn[aria-expanded="true"]::after {
+            transform: rotate(180deg);
         }
     </style>
 </head>
@@ -511,63 +553,7 @@
                 const data = await response.json();
 
                 if (data.status === 'success') {
-                    const alertClass = data.classification === 'malicious' ? 'danger' : 'success';
-                    document.getElementById('alertInfo').innerHTML = `
-                        <div class="alert ${alertClass}">
-                            <div class="card">
-                                <div class="card-header bg-${alertClass} text-white">
-                                    <h5 class="mb-0">Latest Alert</h5>
-                                </div>
-                                <div class="card-body">
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <h6 class="text-${alertClass} fw-bold">⚠️ Alert Summary</h6>
-                                            <ul class="list-unstyled">
-                                                <li><strong>Type:</strong> ${data.classification.toUpperCase()}</li>
-                                                <li><strong>Confidence:</strong> ${(data.confidence * 100).toFixed(2)}%</li>
-                                                <li><strong>Time:</strong> ${data.timestamp}</li>
-                                            </ul>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <h6 class="text-${alertClass} fw-bold">🔍 Attack Details</h6>
-                                            <ul class="list-unstyled">
-                                                <li><strong>From:</strong> Internal Network (${data.alert.match(/(\d+\.\d+\.\d+\.\d+):(\d+)/)[1]})</li>
-                                                <li><strong>To:</strong> Target Server (${data.alert.match(/-> (\d+\.\d+\.\d+\.\d+)/)[1]})</li>
-                                                <li><strong>Risk Level:</strong> High Priority</li>
-                                            </ul>
-                                        </div>
-                                    </div>
-
-                                    <div class="mt-3">
-                                        <h6 class="text-${alertClass} fw-bold">📝 Plain English Explanation</h6>
-                                        <p>${getAlertExplanation(data.alert)}</p>
-                                    </div>
-
-                                    <div class="mt-3">
-                                        <h6 class="text-${alertClass} fw-bold">⚡ Recommended Actions</h6>
-                                        <ul>
-                                            ${getRecommendedActions(data.alert)}
-                                        </ul>
-                                    </div>
-
-                                    <div class="mt-3">
-                                        <h6 class="text-muted mb-2">Technical Details (click to expand)</h6>
-                                        <div class="collapse" id="technicalDetails">
-                                            <div class="alert-details bg-light">
-                                                <pre>${data.alert}</pre>
-                                            </div>
-                                        </div>
-                                        <button class="btn btn-sm btn-outline-secondary mt-2" 
-                                                data-bs-toggle="collapse" 
-                                                data-bs-target="#technicalDetails">
-                                            Show Technical Details
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-
+                    updateAlertDisplay(data);
                     updateStats(data);
                     addToHistory(data);
                 } else {
@@ -1009,6 +995,98 @@
             
             return actions.map(action => `<li>✓ ${action}</li>`).join('');
         }
+
+        function updateAlertDisplay(data) {
+            const alertClass = data.classification === 'malicious' ? 'danger' : 'success';
+            document.getElementById('alertInfo').innerHTML = `
+                <div class="alert ${alertClass}">
+                    <div class="card">
+                        <div class="card-header bg-${alertClass} text-white">
+                            <h5 class="mb-0">Latest Alert</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6 class="text-${alertClass} fw-bold">⚠️ Alert Summary</h6>
+                                    <ul class="list-unstyled">
+                                        <li><strong>Type:</strong> ${data.classification.toUpperCase()}</li>
+                                        <li><strong>Confidence:</strong> ${(data.confidence * 100).toFixed(2)}%</li>
+                                        <li><strong>Time:</strong> ${data.timestamp}</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="text-${alertClass} fw-bold">🔍 Attack Details</h6>
+                                    <ul class="list-unstyled">
+                                        <li><strong>From:</strong> Internal Network (${data.alert.match(/(\d+\.\d+\.\d+\.\d+):(\d+)/)[1]})</li>
+                                        <li><strong>To:</strong> Target Server (${data.alert.match(/-> (\d+\.\d+\.\d+\.\d+)/)[1]})</li>
+                                        <li><strong>Risk Level:</strong> High Priority</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="mt-3">
+                                <h6 class="text-${alertClass} fw-bold">📝 Plain English Explanation</h6>
+                                <p>${getAlertExplanation(data.alert)}</p>
+                            </div>
+
+                            <div class="mt-3">
+                                <h6 class="text-${alertClass} fw-bold">⚡ Recommended Actions</h6>
+                                <ul>
+                                    ${getRecommendedActions(data.alert)}
+                                </ul>
+                            </div>
+
+                            <div class="mt-3">
+                                <button class="details-btn" 
+                                        type="button" 
+                                        data-bs-toggle="collapse" 
+                                        data-bs-target="#technicalDetails" 
+                                        aria-expanded="false" 
+                                        aria-controls="technicalDetails">
+                                    <i class="fas fa-code"></i> Technical Details
+                                </button>
+                                <div class="collapse show" id="technicalDetails">
+                                    <div class="technical-details">
+                                        <h6 class="text-muted mb-2">Raw Alert Data:</h6>
+                                        <pre>${formatTechnicalDetails(data.alert)}</pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function formatTechnicalDetails(alert) {
+            // Format the alert text to be more readable
+            return alert.split('\n').map(line => {
+                // Add proper indentation and formatting
+                if (line.includes('[**]')) {
+                    return `Alert Type:    ${line.trim()}`;
+                } else if (line.includes('Classification:')) {
+                    return `Category:     ${line.trim()}`;
+                } else if (line.match(/\d{2}\/\d{2}-\d{2}:\d{2}:\d{2}/)) {
+                    return `Timestamp:    ${line.trim()}`;
+                } else if (line.includes('TCP') || line.includes('UDP') || line.includes('ICMP')) {
+                    return `Protocol:     ${line.trim()}`;
+                } else if (line.includes('Flags:')) {
+                    return `Flags:        ${line.trim()}`;
+                }
+                return line.trim();
+            }).join('\n');
+        }
+
+        // Add this to your document ready or initialization code
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize all collapse elements
+            var collapseElements = [].slice.call(document.querySelectorAll('.collapse'));
+            collapseElements.map(function(collapseEl) {
+                return new bootstrap.Collapse(collapseEl, {
+                    toggle: false
+                });
+            });
+        });
     </script>
 </body>
 </html> 
