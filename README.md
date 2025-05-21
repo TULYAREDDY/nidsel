@@ -53,7 +53,10 @@ python snort_ml_bridge.py
 ```
 http://127.0.0.1:5000
 ```
-3. open landing-page/index.html
+3. open
+ ```
+landing-page/index.html
+```
 
 4. Use the dashboard to:
    - Monitor network traffic
