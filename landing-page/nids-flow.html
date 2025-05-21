@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NIDS - Data Flow Visualization</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="nids-flow.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <span class="highlight">N</span>IDS
+            </div>
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="simulation.html">Network</a>
+                <a href="nids-flow.html" class="active">Data Flow</a>
+                <a href="#features">Features</a>
+                <a href="#about">About</a>
+                
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="flow-container single-flow">
+        <div class="flow-section">
+            <h2>NIDS Data Flow</h2>
+            <p>Visualizing the end-to-end data pipeline from sources to analysis and visualization.</p>
+            
+            <div class="flow-diagram">
+                <div class="flow-node" id="snort-processor">
+                    <i class="fas fa-sensor"></i>
+                    <h3>Snort Processor</h3>
+                    <p>(Intrusion Detection)</p>
+                </div>
+                 <div class="flow-arrow" id="arrow-snort-ml">
+                   <div class="data-packet"></div>
+                </div>
+                <div class="flow-node" id="ml-bridge">
+                     <i class="fas fa-brain"></i>
+                    <h3>ML Bridge</h3>
+                    <p>(Analysis & Scoring)</p>
+                </div>
+                 <div class="flow-arrow" id="arrow-ml-backend">
+                   <div class="data-packet"></div>
+                </div>
+                 <div class="flow-node" id="backend-api">
+                    <i class="fas fa-server"></i>
+                    <h3>Backend API</h3>
+                    <p>(Processing & Storage)</p>
+                </div>
+                 <div class="flow-arrow" id="arrow-backend-frontend">
+                   <div class="data-packet"></div>
+                </div>
+                 <div class="flow-node" id="frontend-dashboard">
+                     <i class="fas fa-display"></i>
+                    <h3>Frontend Dashboard</h3>
+                    <p>(Visualization & Control)</p>
+                </div>
+            </div>
+
+            <div class="flow-status system-initialized">System initialized. Ready to start data flow simulation.</div>
+             <div class="flow-log log-box" id="unifiedFlowLog"></div>
+        </div>
+    </div>
+
+    <div class="common-controls">
+         <button class="primary-btn common-start-flow-btn"><i class="fas fa-play"></i> Start Data Flow</button>
+    </div>
+
+</body>
+<script src="nids-flow.js"></script>
+</html> 

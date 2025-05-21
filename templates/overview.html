@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NIDS Project Overview</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <style>
+        body {
+            background: linear-gradient(135deg, #18192b 0%, #23244a 100%);
+            color: #fff;
+            font-family: 'Montserrat', Arial, sans-serif;
+        }
+
+        .navbar {
+            background: #23244a;
+            border-bottom: 2px solid #00fff7;
+        }
+
+        .navbar-brand {
+            color: #00fff7 !important;
+            font-size: 2rem;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+
+        .nav-link {
+            color: #fff !important;
+            font-size: 1.1rem;
+            margin-right: 1rem;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 3rem 0 2rem 0;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            font-weight: bold;
+            background: linear-gradient(90deg, #00fff7 0%, #7f5cff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            color: #b0b3c7;
+            font-size: 1.3rem;
+            max-width: 700px;
+            margin: 1rem auto 0 auto;
+        }
+
+        .sim-card {
+            background: linear-gradient(135deg, #23244a 0%, #18192b 100%);
+            border: 1px solid #2e2f5b;
+            border-radius: 20px;
+            box-shadow: 0 4px 24px rgba(0, 255, 247, 0.08);
+            margin-bottom: 2rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+        }
+
+        .sim-card:hover {
+            transform: translateY(-8px) scale(1.03);
+            box-shadow: 0 8px 32px rgba(0, 255, 247, 0.18);
+        }
+
+        .sim-icon {
+            font-size: 3rem;
+            color: #00fff7;
+            margin-bottom: 1rem;
+        }
+
+        .sim-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #00fff7;
+        }
+
+        .sim-desc {
+            color: #b0b3c7;
+        }
+
+        .btn-sim {
+            background: linear-gradient(90deg, #00fff7 0%, #7f5cff 100%);
+            color: #18192b;
+            font-weight: bold;
+            border-radius: 10px;
+            border: none;
+            margin-top: 1rem;
+            transition: background 0.2s;
+        }
+
+        .btn-sim:hover {
+            background: linear-gradient(90deg, #7f5cff 0%, #00fff7 100%);
+            color: #fff;
+        }
+
+        .toast {
+            z-index: 9999;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/overview">NIDS</a>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="/overview">Overview</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/">Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/simulate/port-scan-page">Port Scan</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/simulate/sql-injection-page">SQL Injection</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/simulate/dos-page">DoS</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/simulate/malware-cnc-page">Malware C&amp;C</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/simulate/exploit-kit-page">Exploit Kit</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <div class="container">
+        <div class="hero">
+            <h1>Network Intrusion Detection System</h1>
+            <p>
+                Experience real-time, interactive network security simulations. Launch different cyber attacks and watch
+                the dashboard respond instantly. Powered by ML, Snort, and modern web tech.
+            </p>
+        </div>
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            <!-- Port Scan Simulation Card -->
+            <div class="col">
+                <a href="/" style="text-decoration:none;">
+                    <div class="sim-card text-center p-4">
+                        <div class="sim-icon"><i class="fas fa-tachometer-alt"
+                                style="font-size: 40px; color: white;"></i></div>
+                        <div class="sim-title">Dashboard</div>
+                        <div class="sim-desc">View dashboard for live updates of attack with visual ques and charts.</div>
+                        <button class="btn btn-sim mt-3">Go to dashboard</button>
+                    </div>
+                </a>
+            </div>
+            <div class="col">
+                <a href="/simulate/port-scan-page" style="text-decoration:none;">
+                    <div class="sim-card text-center p-4">
+                        <div class="sim-icon">&#128295;</div>
+                        <div class="sim-title">Port Scan</div>
+                        <div class="sim-desc">Simulate a port scan attack and see how the system detects it.</div>
+                        <button class="btn btn-sim mt-3">Go to Port Scan Simulation</button>
+                    </div>
+                </a>
+            </div>
+            <!-- SQL Injection Simulation Card -->
+            <div class="col">
+                <a href="/simulate/sql-injection-page" style="text-decoration:none;">
+                    <div class="sim-card text-center p-4">
+                        <div class="sim-icon">&#128187;</div>
+                        <div class="sim-title">SQL Injection</div>
+                        <div class="sim-desc">Simulate SQL injection attempts and monitor detection.</div>
+                        <button class="btn btn-sim mt-3">Go to SQL Injection Simulation</button>
+                    </div>
+                </a>
+            </div>
+            <!-- DoS Attack Simulation Card -->
+            <div class="col">
+                <a href="/simulate/dos-page" style="text-decoration:none;">
+                    <div class="sim-card text-center p-4">
+                        <div class="sim-icon">&#9888;&#65039;</div>
+                        <div class="sim-title">Denial of Service</div>
+                        <div class="sim-desc">Simulate a DoS attack and watch the dashboard react.</div>
+                        <button class="btn btn-sim mt-3">Go to DoS Simulation</button>
+                    </div>
+                </a>
+            </div>
+            <!-- Malware C&C Simulation Card -->
+            <div class="col">
+                <a href="/simulate/malware-cnc-page" style="text-decoration:none;">
+                    <div class="sim-card text-center p-4">
+                        <div class="sim-icon">&#128126;</div>
+                        <div class="sim-title">Malware C&amp;C</div>
+                        <div class="sim-desc">Simulate malware command &amp; control traffic and detection.</div>
+                        <button class="btn btn-sim mt-3">Go to Malware C&amp;C Simulation</button>
+                    </div>
+                </a>
+            </div>
+            <!-- Exploit Kit Simulation Card -->
+            <div class="col">
+                <a href="/simulate/exploit-kit-page" style="text-decoration:none;">
+                    <div class="sim-card text-center p-4">
+                        <div class="sim-icon">&#128302;</div>
+                        <div class="sim-title">Exploit Kit</div>
+                        <div class="sim-desc">Simulate exploit kit activity and see instant feedback.</div>
+                        <button class="btn btn-sim mt-3">Go to Exploit Kit Simulation</button>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+    <script>
+        function runSim(endpoint, name) {
+            showToast('Launching ' + name + ' simulation...');
+            fetch(endpoint, { method: 'POST' })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        showToast(name + ' attack launched!');
+                    } else {
+                        showToast('Error: ' + (data.error || data.message));
+                    }
+                })
+                .catch(err => showToast('Error: ' + err));
+        }
+        function showToast(msg) {
+            let toast = document.createElement('div');
+            toast.className = 'toast align-items-center text-bg-primary border-0 show position-fixed top-0 end-0 m-3';
+            toast.style.zIndex = 9999;
+            toast.innerHTML = `<div class="d-flex"><div class="toast-body">${msg}</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div>`;
+            document.body.appendChild(toast);
+            setTimeout(() => { toast.remove(); }, 3000);
+        }
+    </script>
+</body>
+
+</html>

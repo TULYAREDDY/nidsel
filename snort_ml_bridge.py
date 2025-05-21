@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, jsonify, render_template, request, send_from_directory
 import subprocess
 import pickle
 import pandas as pd
@@ -7,13 +7,27 @@ import re
 import os
 import logging
 import random
+from network_algorithms import NetworkAlgorithms, NetworkAnalyzer
+import json
+import numpy as np
+from sklearn.linear_model import LogisticRegression
+import networkx as nx
+from snort_processor import SnortAlertHandler, SnortProcessor
+from port_scan_simulation import simulate_port_scan
+from sql_injection_simulation import simulate_sql_injection
+from dos_simulation import simulate_dos_attack
+from malware_cnc_simulation import simulate_malware_cnc
+from exploit_kit_simulation import simulate_exploit_kit
 
 # Set up logging
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
 logger = logging.getLogger(__name__)
 
 # Global configuration
-USE_LIVE_SNORT = False  # Default to simulation mode
+USE_LIVE_SNORT = True  # Now default to live mode
 SNORT_STATUS = {
     'is_running': False,
     'alert_file_accessible': False,
@@ -24,10 +38,36 @@ SNORT_STATUS = {
 NETWORK_CONNECTIONS = []
 MAX_STORED_CONNECTIONS = 50
 
-app = Flask(__name__)
+# Add new global variables for network analysis
+NETWORK_GRAPH = {}
+ALERT_QUEUE = []
+MAX_ALERT_CAPACITY = 100  # Maximum number of alerts to process
 
-# Load the ML model from the correct path
-MODEL_PATH = r"C:\Users\tulya\el4\EL4\logistic_model.pkl"
+# Initialize Flask app with correct static and template folders
+app = Flask(__name__, 
+    static_url_path='',
+    static_folder='static',
+    template_folder='templates'
+)
+
+# Initialize Snort processor
+snort_processor = SnortProcessor()
+
+# Global variables to store data
+network_data = {
+    "nodes": [],
+    "links": []
+}
+attack_history = []
+current_threat_level = "low"
+ml_model_stats = {
+    "accuracy": 95.5,
+    "false_positives": 0,
+    "detection_rate": 0
+}
+
+# Load the ML model
+MODEL_PATH = "logistic_model.pkl"
 try:
     logger.info(f"Loading ML model from {MODEL_PATH}")
     with open(MODEL_PATH, 'rb') as f:
@@ -36,6 +76,9 @@ try:
 except Exception as e:
     logger.error(f"Error loading ML model: {e}")
     raise
+
+# Initialize network analyzer
+network_analyzer = NetworkAnalyzer()
 
 def generate_mock_alert():
     """Generate a realistic-looking Snort alert with both normal and malicious patterns"""
@@ -267,6 +310,7 @@ def update_network_connections(alert_text):
 
 @app.route('/')
 def index():
+    """Serve the main dashboard page"""
     return render_template('index.html')
 
 @app.route('/check_snort', methods=['GET'])
@@ -363,45 +407,6 @@ def get_current_mode():
         'snort_status': SNORT_STATUS
     })
 
-@app.route('/network_data')
-def get_network_data():
-    """Get network connection data for visualization"""
-    try:
-        # If no connections exist, generate some mock data
-        if not NETWORK_CONNECTIONS and not USE_LIVE_SNORT:
-            mock_alert, _ = generate_mock_alert()
-            update_network_connections(mock_alert)
-        
-        # Format data for visualization
-        nodes = set()
-        links = []
-        
-        for conn in NETWORK_CONNECTIONS:
-            nodes.add(conn['source'])
-            nodes.add(conn['destination'])
-            links.append({
-                'source': conn['source'],
-                'target': conn['destination'],
-                'type': conn['alert_type'],
-                'timestamp': conn['timestamp']
-            })
-        
-        nodes = [{'id': ip, 'group': 1} for ip in nodes]
-        
-        return jsonify({
-            'status': 'success',
-            'data': {
-                'nodes': nodes,
-                'links': links
-            }
-        })
-    except Exception as e:
-        logger.error(f"Error getting network data: {e}")
-        return jsonify({
-            'status': 'error',
-            'message': str(e)
-        })
-
 @app.route('/simulate_attack', methods=['POST'])
 def simulate_attack():
     try:
@@ -462,5 +467,338 @@ def simulate_attack():
             'message': str(e)
         })
 
+@app.route('/analyze_alerts', methods=['POST'])
+def analyze_alerts():
+    """
+    Analyzes alerts using the Knapsack algorithm to prioritize them based on severity and complexity.
+    """
+    try:
+        alerts = request.json.get('alerts', [])
+        capacity = request.json.get('capacity', 50)
+        
+        # Process alerts for knapsack
+        processed_alerts = []
+        for alert in alerts:
+            processed_alerts.append({
+                'id': alert.get('id'),
+                'severity': alert.get('severity', 1),
+                'complexity': alert.get('complexity', 1),
+                'type': alert.get('type'),
+                'source': alert.get('source'),
+                'destination': alert.get('destination')
+            })
+        
+        # Use knapsack algorithm to prioritize alerts
+        prioritized_alerts = NetworkAlgorithms.knapsack_alerts(processed_alerts, capacity)
+        
+        return jsonify({
+            'status': 'success',
+            'prioritized_alerts': prioritized_alerts
+        })
+    except Exception as e:
+        logger.error(f"Error in analyze_alerts: {e}")
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+@app.route('/analyze_attack_path', methods=['POST'])
+def analyze_attack_path():
+    """
+    Analyzes potential attack paths using Dijkstra's algorithm.
+    """
+    try:
+        data = request.json
+        start_node = data.get('start_node')
+        end_node = data.get('end_node')
+        
+        if not start_node or not end_node:
+            return jsonify({'status': 'error', 'message': 'Start and end nodes are required'}), 400
+        
+        # Get or create network graph
+        if not NETWORK_GRAPH:
+            # Create a sample graph if none exists
+            nodes = ['192.168.1.1', '192.168.1.2', '192.168.1.3', '10.0.0.1', '10.0.0.2']
+            connections = [
+                ('192.168.1.1', '192.168.1.2', 1.0),
+                ('192.168.1.2', '192.168.1.3', 2.0),
+                ('192.168.1.3', '10.0.0.1', 1.5),
+                ('10.0.0.1', '10.0.0.2', 1.0)
+            ]
+            NETWORK_GRAPH.update(NetworkAlgorithms.create_network_graph(nodes, connections))
+        
+        # Find shortest path
+        path, total_risk = NetworkAlgorithms.dijkstra_shortest_path(NETWORK_GRAPH, start_node, end_node)
+        
+        return jsonify({
+            'status': 'success',
+            'path': path,
+            'total_risk': total_risk
+        })
+    except Exception as e:
+        logger.error(f"Error in analyze_attack_path: {e}")
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+@app.route('/analyze_attack_propagation', methods=['POST'])
+def analyze_attack_propagation():
+    """
+    Analyzes attack propagation using both DFS and BFS algorithms.
+    """
+    try:
+        data = request.json
+        start_node = data.get('start_node')
+        algorithm = data.get('algorithm', 'both')  # 'dfs', 'bfs', or 'both'
+        
+        if not start_node:
+            return jsonify({'status': 'error', 'message': 'Start node is required'}), 400
+        
+        # Create a simple graph for demonstration
+        graph = {
+            '192.168.1.1': ['192.168.1.2', '192.168.1.3'],
+            '192.168.1.2': ['192.168.1.1', '192.168.1.4'],
+            '192.168.1.3': ['192.168.1.1', '192.168.1.4'],
+            '192.168.1.4': ['192.168.1.2', '192.168.1.3', '10.0.0.1'],
+            '10.0.0.1': ['192.168.1.4', '10.0.0.2'],
+            '10.0.0.2': ['10.0.0.1']
+        }
+        
+        result = {}
+        
+        if algorithm in ['dfs', 'both']:
+            dfs_result = NetworkAlgorithms.dfs_attack_propagation(graph, start_node)
+            result['dfs'] = dfs_result
+        
+        if algorithm in ['bfs', 'both']:
+            bfs_result = NetworkAlgorithms.bfs_attack_propagation(graph, start_node)
+            result['bfs'] = bfs_result
+        
+        return jsonify({
+            'status': 'success',
+            'propagation': result
+        })
+    except Exception as e:
+        logger.error(f"Error in analyze_attack_propagation: {e}")
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+@app.route('/api/network-data')
+def get_network_data():
+    """Get network data for visualization"""
+    return jsonify(network_data)
+
+@app.route('/api/realtime-data')
+def get_realtime_data():
+    """Get real-time data for dashboard updates"""
+    return jsonify({
+        "attack_history": attack_history[-10:],  # Last 10 attacks
+        "ml_stats": ml_model_stats,
+        "threat_level": current_threat_level
+    })
+
+@app.route('/api/analyze', methods=['POST'])
+def analyze_network():
+    """Analyze network data using ML algorithms"""
+    try:
+        data = request.get_json()
+        analyzer = NetworkAnalyzer()
+        analysis = analyzer.analyze_network(data)
+        return jsonify(analysis)
+    except Exception as e:
+        logger.error(f"Error analyzing network: {e}")
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/simulate-attack', methods=['POST'])
+def simulate_attack_api():
+    """Simulate a network attack and update dashboard instantly"""
+    try:
+        data = request.get_json()
+        attack_type = data.get('type')
+        duration = data.get('duration', 30)
+        if not attack_type:
+            return jsonify({"error": "Attack type not specified"}), 400
+        snort_processor.simulate_attack(attack_type, duration)
+        # Immediately update dashboard with a fake alert for instant feedback
+        alert_data = {
+            "timestamp": datetime.now().isoformat(),
+            "type": attack_type,
+            "source_ip": "192.168.1.100",
+            "dest_ip": "10.0.0.1",
+            "classification": "malicious",
+            "priority": 1
+        }
+        attack_history.append(alert_data)
+        if len(attack_history) > 100:
+            attack_history.pop(0)
+        # Update network_data for visualization
+        source_ip = alert_data["source_ip"]
+        dest_ip = alert_data["dest_ip"]
+        if not any(node["id"] == source_ip for node in network_data["nodes"]):
+            network_data["nodes"].append({"id": source_ip, "type": "attacker"})
+        if not any(node["id"] == dest_ip for node in network_data["nodes"]):
+            network_data["nodes"].append({"id": dest_ip, "type": "target"})
+        network_data["links"].append({
+            "source": source_ip,
+            "target": dest_ip,
+            "type": alert_data["classification"],
+            "value": 1
+        })
+        # Add/update traffic volume metric
+        if "traffic_volume" not in ml_model_stats:
+            ml_model_stats["traffic_volume"] = []
+        ml_model_stats["traffic_volume"].append(1)
+        if len(ml_model_stats["traffic_volume"]) > 10:
+            ml_model_stats["traffic_volume"].pop(0)
+        return jsonify({"status": "success", "message": f"Started {attack_type} simulation", "alert": alert_data})
+    except Exception as e:
+        logger.error(f"Error simulating attack: {e}")
+        return jsonify({"error": str(e)}), 500
+
+def update_dashboard_data(alert):
+    """Update dashboard data when new alerts are received"""
+    global network_data, attack_history, current_threat_level, ml_model_stats
+    
+    try:
+        # Parse alert and update data
+        alert_data = {
+            "timestamp": datetime.now().isoformat(),
+            "type": alert.get("type", "unknown"),
+            "source_ip": alert.get("source_ip", "unknown"),
+            "dest_ip": alert.get("dest_ip", "unknown"),
+            "classification": alert.get("classification", "unknown"),
+            "priority": alert.get("priority", 0)
+        }
+        
+        # Update attack history
+        attack_history.append(alert_data)
+        if len(attack_history) > 100:  # Keep last 100 alerts
+            attack_history.pop(0)
+            
+        # Update network data
+        source_ip = alert_data["source_ip"]
+        dest_ip = alert_data["dest_ip"]
+        
+        # Add nodes if they don't exist
+        if not any(node["id"] == source_ip for node in network_data["nodes"]):
+            network_data["nodes"].append({
+                "id": source_ip,
+                "type": "attacker" if alert_data["classification"] == "malicious" else "normal"
+            })
+        if not any(node["id"] == dest_ip for node in network_data["nodes"]):
+            network_data["nodes"].append({
+                "id": dest_ip,
+                "type": "target"
+            })
+            
+        # Add link
+        network_data["links"].append({
+            "source": source_ip,
+            "target": dest_ip,
+            "type": alert_data["classification"],
+            "value": 1
+        })
+        
+        # Update threat level
+        malicious_count = sum(1 for a in attack_history[-20:] 
+                            if a["classification"] == "malicious")
+        suspicious_count = sum(1 for a in attack_history[-20:] 
+                             if a["classification"] == "suspicious")
+        
+        if malicious_count >= 3:
+            current_threat_level = "high"
+        elif malicious_count >= 1 or suspicious_count >= 2:
+            current_threat_level = "medium"
+        else:
+            current_threat_level = "low"
+            
+        # Update ML stats
+        total_alerts = len(attack_history)
+        if total_alerts > 0:
+            detection_rate = (malicious_count + suspicious_count) / total_alerts * 100
+            ml_model_stats["detection_rate"] = round(detection_rate, 1)
+            ml_model_stats["false_positives"] = sum(1 for a in attack_history 
+                                                  if a["classification"] in ["malicious", "suspicious"] 
+                                                  and a["priority"] > 2)
+            
+    except Exception as e:
+        logger.error(f"Error updating dashboard data: {e}")
+
+# Set up alert callback
+snort_processor.alert_handler.callback = update_dashboard_data
+
+@app.route('/overview')
+def overview():
+    """Serve the project overview/landing page"""
+    return render_template('overview.html')
+
+# Helper to update dashboard data with alert
+def update_dashboard_with_alert(alert):
+    attack_history.append(alert)
+    if len(attack_history) > 100:
+        attack_history.pop(0)
+    source_ip = alert["source_ip"]
+    dest_ip = alert["dest_ip"]
+    if not any(node["id"] == source_ip for node in network_data["nodes"]):
+        network_data["nodes"].append({"id": source_ip, "type": "attacker"})
+    if not any(node["id"] == dest_ip for node in network_data["nodes"]):
+        network_data["nodes"].append({"id": dest_ip, "type": "target"})
+    network_data["links"].append({
+        "source": source_ip,
+        "target": dest_ip,
+        "type": alert["classification"],
+        "value": 1
+    })
+    if "traffic_volume" not in ml_model_stats:
+        ml_model_stats["traffic_volume"] = []
+    ml_model_stats["traffic_volume"].append(1)
+    if len(ml_model_stats["traffic_volume"]) > 10:
+        ml_model_stats["traffic_volume"].pop(0)
+
+@app.route('/simulate/port-scan', methods=['POST'])
+def simulate_port_scan_endpoint():
+    alert = simulate_port_scan()
+    update_dashboard_with_alert(alert)
+    return jsonify({"status": "success", "alert": alert})
+
+@app.route('/simulate/sql-injection', methods=['POST'])
+def simulate_sql_injection_endpoint():
+    alert = simulate_sql_injection()
+    update_dashboard_with_alert(alert)
+    return jsonify({"status": "success", "alert": alert})
+
+@app.route('/simulate/dos', methods=['POST'])
+def simulate_dos_endpoint():
+    alert = simulate_dos_attack()
+    update_dashboard_with_alert(alert)
+    return jsonify({"status": "success", "alert": alert})
+
+@app.route('/simulate/malware-cnc', methods=['POST'])
+def simulate_malware_cnc_endpoint():
+    alert = simulate_malware_cnc()
+    update_dashboard_with_alert(alert)
+    return jsonify({"status": "success", "alert": alert})
+
+@app.route('/simulate/exploit-kit', methods=['POST'])
+def simulate_exploit_kit_endpoint():
+    alert = simulate_exploit_kit()
+    update_dashboard_with_alert(alert)
+    return jsonify({"status": "success", "alert": alert})
+
+@app.route('/simulate/port-scan-page')
+def simulate_port_scan_page():
+    return render_template('simulate_port_scan.html')
+
+@app.route('/simulate/sql-injection-page')
+def simulate_sql_injection_page():
+    return render_template('simulate_sql_injection.html')
+
+@app.route('/simulate/dos-page')
+def simulate_dos_page():
+    return render_template('simulate_dos.html')
+
+@app.route('/simulate/malware-cnc-page')
+def simulate_malware_cnc_page():
+    return render_template('simulate_malware_cnc.html')
+
+@app.route('/simulate/exploit-kit-page')
+def simulate_exploit_kit_page():
+    return render_template('simulate_exploit_kit.html')
+
 if __name__ == '__main__':
-    app.run(debug=True) 
+    # Start Flask app
+    app.run(debug=True, use_reloader=False) 

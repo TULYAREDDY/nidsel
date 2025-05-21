@@ -1,0 +1,579 @@
+/* Base Styles */
+:root {
+    --primary-color: #00ffff;
+    --secondary-color: #0066ff;
+    --background-dark: #0f172a;
+    --background-light: #1e293b;
+    --text-primary: #ffffff;
+    --text-secondary: #94a3b8;
+    --card-bg: rgba(15, 23, 42, 0.6);
+    --border-color: rgba(0, 255, 255, 0.1);
+    --accent-color: #00aaff; /* A slightly brighter accent for lines/points */
+}
+
+html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 80px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* General Styles */
+body {
+    background: linear-gradient(135deg, var(--background-dark) 0%, var(--background-light) 100%);
+    font-family: 'Inter', sans-serif;
+    color: var(--text-primary);
+    line-height: 1.6;
+    padding: 1rem; /* Add some padding around the content */
+}
+
+.container-fluid { /* Assuming a Bootstrap container or similar is used */
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+/* Dashboard Header */
+.dashboard-header {
+    background: var(--card-bg);
+    color: var(--text-primary);
+    padding: 2rem 1rem;
+    margin-bottom: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--border-color);
+    text-align: center;
+}
+
+.dashboard-header h1 {
+    margin: 0;
+    font-size: 2.8rem;
+    font-weight: 700;
+    background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Card Grid Layout (example for main content areas) */
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0 -0.75rem;
+}
+
+.col-md-6, .col-lg-4, .col-12 {
+    padding: 0 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+/* Card base styling */
+.card {
+    background-color: rgba(0, 0, 0, 0.6); /* Dark background with some transparency */
+    border: 1px solid #00f; /* Blue border matching the network theme */
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.2); /* Cyan glow */
+    margin-bottom: 20px;
+    overflow: hidden;
+}
+
+.card-header {
+    background: rgba(0, 255, 255, 0.05); /* Subtle header background */
+    border-bottom: 1px solid rgba(0, 255, 255, 0.3); /* Subtle cyan border */
+    color: #0ff; /* Cyan color for headers */
+    padding: 10px;
+    font-size: 1.1em;
+    font-weight: bold;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    margin-bottom: 15px;
+}
+
+.card-body {
+    padding: 1.5rem; /* Consistent padding */
+    flex-grow: 1; /* Allow body to fill available space */
+    font-size: 0.95em;
+    color: #ccc; /* Lighter text for content */
+}
+
+/* Alert Cards */
+.alert-card {
+    /* Inherits base card styles */
+    border-left: 4px solid #ff0; /* Yellow border for alerts */
+    margin-bottom: 1rem; /* Spacing between alerts */
+    transition: transform 0.3s ease, border-color 0.3s ease;
+}
+
+.alert-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--primary-color);
+}
+
+.alert-card.malicious {
+    border-left-color: #ff3333;
+}
+
+.alert-card.normal {
+    border-left-color: #33ff57;
+}
+
+.alert-card.suspicious {
+    border-left-color: #ffc107;
+}
+
+.alert-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+    border-bottom: 1px dashed rgba(0, 255, 255, 0.05);
+    padding-bottom: 0.5rem;
+}
+
+.alert-type {
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 1rem;
+    color: var(--primary-color);
+}
+
+.alert-time {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+.alert-content {
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+}
+
+.alert-details {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.alert-details div strong {
+    color: var(--primary-color);
+    margin-right: 0.3rem;
+}
+
+/* Stats Cards (inherits from .card) */
+.stats-card h4 {
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+    font-weight: 600;
+    font-size: 1.4rem;
+}
+
+/* Threat Level */
+.threat-level {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: 700;
+    margin-top: 0.5rem;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+}
+
+.threat-level.low {
+    border-color: #33ff57;
+    color: #33ff57;
+    background-color: rgba(51, 255, 87, 0.1);
+}
+
+.threat-level.medium {
+    border-color: #ffc107;
+    color: #ffc107;
+     background-color: rgba(255, 193, 7, 0.1);
+}
+
+.threat-level.high {
+    border-color: #ff3333;
+    color: #ff3333;
+     background-color: rgba(255, 51, 51, 0.1);
+}
+
+/* Network Map (inherits from .card) */
+.network-map {
+    height: 400px;
+    position: relative;
+    /* Background, border, shadow, margin inherited from .card */
+}
+
+.network-map svg {
+    background: transparent;
+    overflow: visible;
+}
+
+/* ML Stats */
+.ml-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+}
+
+.stat-item {
+    background: var(--card-bg);
+    border-radius: 8px;
+    padding: 1.5rem;
+    text-align: center;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Lighter shadow for inner items */
+    transition: transform 0.3s ease, border-color 0.3s ease;
+}
+
+.stat-item:hover {
+    transform: translateY(-2px);
+    border-color: var(--primary-color);
+}
+
+.stat-label {
+    display: block;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    margin-bottom: 0.5rem;
+}
+
+.stat-value {
+    display: block;
+    color: var(--primary-color);
+    font-size: 1.8rem;
+    font-weight: 700;
+}
+
+/* Export Button */
+.export-btn {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    padding: 0.9rem 1.8rem;
+    background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+    color: var(--text-primary);
+    border: none;
+    border-radius: 25px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    z-index: 500;
+}
+
+.export-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 40px rgba(0, 255, 255, 0.4);
+}
+
+/* Chart Containers (inherits from .card) */
+.chart-container {
+    height: 300px;
+    position: relative;
+    /* Background, border, shadow, padding inherited from .card */
+}
+
+/* Chart Styling (assuming SVG or Canvas elements within .chart-container) */
+.chart-container canvas, /* Style for Chart.js canvas */
+.chart-container svg { /* Style for D3.js SVG */
+    background: transparent; /* Ensure chart background is transparent */
+    display: block; /* Prevent extra space below canvas/svg */
+    width: 100% !important; /* Ensure charts take full width */
+    height: 100% !important; /* Ensure charts take full height */
+}
+
+/* Specific styles for chart elements (adjust as needed based on chart library) */
+.chart-container .ct-chart .ct-label {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    fill: var(--text-secondary); /* For SVG text */
+}
+
+.chart-container .ct-chart .ct-grid {
+    stroke: rgba(0, 255, 255, 0.08);
+    stroke-width: 1px;
+}
+
+.chart-container .ct-chart .ct-point,
+.chart-container .ct-chart .ct-line,
+.chart-container .ct-chart .ct-bar {
+    stroke-width: 2px;
+    stroke-linecap: round;
+}
+
+.chart-container .ct-chart .ct-series-a .ct-slice-pie,
+.chart-container .ct-chart .ct-series-a .ct-bar {
+    fill: var(--primary-color);
+    stroke: var(--card-bg); /* Match card background for separation */
+    stroke-width: 3px;
+}
+
+.chart-container .ct-chart .ct-series-b .ct-slice-pie,
+.chart-container .ct-chart .ct-series-b .ct-bar {
+    fill: var(--secondary-color);
+     stroke: var(--card-bg);
+     stroke-width: 3px;
+}
+
+.chart-container .ct-chart .ct-series-c .ct-slice-pie,
+.chart-container .ct-chart .ct-series-c .ct-bar {
+    fill: #ff3333; /* Malicious color */
+     stroke: var(--card-bg);
+     stroke-width: 3px;
+}
+
+.chart-container .ct-chart text {
+    fill: var(--text-secondary);
+}
+
+/* Example for pie chart legend */
+/* Assuming legend is within .card-body or similar */
+.card-body .ct-legend {
+    margin-top: 1rem; /* Space above legend */
+    text-align: center;
+}
+
+.card-body .ct-legend .ct-legend-item {
+    display: inline-block;
+    margin: 0 0.5rem; /* Space between legend items */
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.card-body .ct-legend .ct-legend-item::before {
+    content: '';
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    margin-right: 5px;
+    border-radius: 2px;
+    vertical-align: middle;
+}
+
+.card-body .ct-legend .ct-series-a::before { background-color: var(--primary-color); }
+.card-body .ct-legend .ct-series-b::before { background-color: var(--secondary-color); }
+.card-body .ct-legend .ct-series-c::before { background-color: #ff3333; }
+
+/* Alert Translation (inherits from .card) */
+.alert-translation {
+    /* Background, border, shadow, padding, margin-top inherited from .card */
+    font-size: 0.95rem;
+}
+
+.alert-translation h5 {
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.alert-translation ul {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.alert-translation li {
+    margin: 0.7rem 0;
+    padding-left: 1.8rem;
+    position: relative;
+    color: var(--text-secondary);
+}
+
+.alert-translation li:before {
+    content: "→";
+    position: absolute;
+    left: 0;
+    color: var(--primary-color);
+    font-weight: bold;
+}
+
+/* Network Nodes and Links (within network-map svg) */
+.node {
+    stroke: var(--text-primary);
+    stroke-width: 1.8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.node.source {
+    fill: #ff5733;
+}
+
+.node.target {
+    fill: #33ff57;
+}
+
+.node.malicious {
+    fill: #ff3333;
+}
+
+.node.normal {
+    fill: var(--primary-color);
+}
+
+.node:hover {
+    filter: brightness(1.5);
+}
+
+.link {
+    stroke: var(--text-secondary);
+    stroke-opacity: 0.5;
+    stroke-width: 1.5px;
+    transition: all 0.3s ease;
+}
+
+.link.malicious {
+    stroke: #ff3333;
+    stroke-width: 2px;
+}
+
+.link.normal {
+    stroke: var(--primary-color);
+    stroke-width: 1.5px;
+}
+
+.node-label {
+    fill: var(--text-primary);
+    font-size: 11px;
+    pointer-events: none;
+    text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+}
+
+/* Attack Timeline (inherits from .card)*/
+.attack-timeline {
+    /* Background, border, shadow, padding, margin-top inherited from .card */
+     height: 250px;
+}
+
+/* Technical Details (inherits from .card)*/
+.technical-details {
+    /* Background, border, shadow, padding, margin-top inherited from .card */
+    font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+    font-size: 0.9em;
+    color: var(--text-secondary);
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+
+/* Simulation Control Panel (inherits from .card)*/
+.form-group label {
+    color: var(--text-primary); /* Ensure form labels are visible */
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.form-control {
+    background-color: rgba(0, 0, 0, 0.2); /* Subtle input background */
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    width: 100%;
+}
+
+.form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.25rem rgba(0, 255, 255, 0.25); /* Focus glow */
+    background-color: rgba(0, 0, 0, 0.3); /* Slightly darker on focus */
+    color: var(--text-primary);
+}
+
+.btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 20px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.btn-danger {
+    background: linear-gradient(45deg, #ff3333, #cc0000);
+    color: white;
+}
+
+.btn-danger:hover {
+    background: linear-gradient(45deg, #cc0000, #990000);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(255, 51, 51, 0.3);
+}
+
+.btn-secondary {
+    background: var(--card-bg);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+}
+
+.btn-secondary:hover {
+    background: rgba(15, 23, 42, 0.8); /* Slightly darker */
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 255, 255, 0.1);
+}
+
+.btn-primary {
+     background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+    color: var(--text-primary);
+}
+
+.btn-primary:hover {
+     background: linear-gradient(45deg, var(--secondary-color), var(--primary-color));
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 255, 255, 0.3);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .dashboard-header h1 {
+        font-size: 2rem;
+    }
+    
+    .ml-stats {
+        grid-template-columns: 1fr;
+    }
+    
+    .chart-container {
+        height: 250px;
+    }
+
+    body {
+        padding: 0.5rem;
+    }
+
+     .container-fluid {
+        padding: 0 0.5rem;
+    }
+
+    .col-md-6, .col-lg-4, .col-12 {
+        padding: 0 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .alert-header {
+        flex-direction: column;
+        align-items: flex-start;
+        margin-bottom: 0.5rem;
+    }
+
+    .alert-time {
+        margin-top: 0.2rem;
+    }
+
+    .alert-details {
+        gap: 1rem;
+    }
+
+    .export-btn {
+        bottom: 1rem;
+        right: 1rem;
+        padding: 0.6rem 1.2rem;
+        font-size: 1rem;
+    }
+} 

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NIDS - Mathematical Models Simulation</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="math-models-simulation.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <span class="highlight">N</span>IDS
+            </div>
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="simulation.html">Network</a>
+                <a href="nids-flow.html">Data Flow</a>
+                <a href="daa-simulation.html">DAA Concepts</a>
+                <a href="math-models-simulation.html" class="active">Math Models</a>
+                
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="math-container">
+        <div class="math-section">
+            <h2>Mathematical Models in Network Security</h2>
+            <p>Visualizing key mathematical models used in network intrusion detection and analysis.</p>
+
+            <!-- Model Selection -->
+            <div class="model-controls">
+                <select id="modelSelect" class="model-select">
+                    <option value="bayesian">Bayesian Network (Threat Assessment)</option>
+                    <option value="markov">Markov Chain (Attack States)</option>
+                    <option value="knapsack">Knapsack (Alert Prioritization)</option>
+                </select>
+                <button id="startSimulation" class="primary-btn">
+                    <i class="fas fa-play"></i> Start Simulation
+                </button>
+                <button id="resetSimulation" class="secondary-btn" disabled>
+                    <i class="fas fa-redo"></i> Reset
+                </button>
+            </div>
+
+            <!-- Simulation Area -->
+            <div class="simulation-area">
+                <!-- Left: Visualization -->
+                <div class="visualization-container">
+                    <div class="model-visualization" id="modelVisualization">
+                        <!-- Visualization will be rendered here -->
+                    </div>
+                </div>
+
+                <!-- Right: Controls and Log -->
+                <div class="controls-log-container">
+                    <div class="model-controls-panel">
+                        <h3><i class="fas fa-sliders-h"></i> Model Parameters</h3>
+                        <div id="modelControls">
+                            <!-- Dynamic controls will be added here -->
+                        </div>
+                    </div>
+                    <div class="simulation-log">
+                        <h3><i class="fas fa-terminal"></i> Simulation Log</h3>
+                        <div class="log-box" id="simulationLog">
+                            <div class="log-entry info">
+                                <i class="fas fa-info-circle"></i>
+                                <div class="log-content">
+                                    <div class="timestamp">[12:00:00]</div>
+                                    <div class="message">Select a mathematical model to begin simulation.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="math-models-simulation.js"></script>
+</body>
+</html> 

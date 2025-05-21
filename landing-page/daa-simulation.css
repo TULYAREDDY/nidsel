@@ -1,0 +1,328 @@
+/* DAA Simulation Styles */
+.daa-container {
+    padding-top: 100px;
+    min-height: 100vh;
+    background: var(--background-dark);
+    padding: 2rem;
+}
+
+.daa-section {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 1rem;
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.daa-section h2 {
+    color: var(--text-primary);
+    font-size: 1.75rem;
+    margin-bottom: 0.5rem;
+    text-align: center;
+}
+
+.daa-section p {
+    color: var(--text-secondary);
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+/* Algorithm Controls */
+.algorithm-controls {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-bottom: 2rem;
+}
+
+.algorithm-select {
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    font-size: 1rem;
+    min-width: 250px;
+}
+
+/* Main Simulation Area */
+.simulation-area {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    height: 700px;
+}
+
+/* Graph Container */
+.graph-container {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Enhanced Simulation Log */
+.simulation-log {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.simulation-log h3 {
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.simulation-log h3 i {
+    color: var(--primary-color);
+}
+
+.log-box {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    padding: 1rem;
+    flex: 1;
+    overflow-y: auto;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+}
+
+.log-entry {
+    margin-bottom: 0.75rem;
+    padding: 0.75rem;
+    border-radius: 0.25rem;
+    animation: fadeIn 0.3s ease-in;
+    line-height: 1.4;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+}
+
+.log-entry i {
+    font-size: 1rem;
+    margin-top: 0.2rem;
+}
+
+.log-entry.info {
+    background: rgba(33, 150, 243, 0.1);
+    border-left: 3px solid #2196F3;
+}
+
+.log-entry.info i {
+    color: #2196F3;
+}
+
+.log-entry.success {
+    background: rgba(76, 175, 80, 0.1);
+    border-left: 3px solid #4CAF50;
+}
+
+.log-entry.success i {
+    color: #4CAF50;
+}
+
+.log-entry.warning {
+    background: rgba(255, 193, 7, 0.1);
+    border-left: 3px solid #FFC107;
+}
+
+.log-entry.warning i {
+    color: #FFC107;
+}
+
+.log-entry.error {
+    background: rgba(244, 67, 54, 0.1);
+    border-left: 3px solid #f44336;
+}
+
+.log-entry.error i {
+    color: #f44336;
+}
+
+.log-entry .timestamp {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    margin-bottom: 0.25rem;
+}
+
+.log-entry .message {
+    flex: 1;
+}
+
+/* Enhanced Graph Elements */
+.node {
+    width: 70px;
+    height: 70px;
+    background: var(--primary-color);
+    border-radius: 50%;
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-primary);
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    padding: 0.5rem;
+    text-align: center;
+}
+
+.node-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.node-id {
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.node-ip {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+}
+
+.node-status {
+    font-size: 0.7rem;
+    padding: 0.1rem 0.3rem;
+    border-radius: 0.25rem;
+    background: rgba(0, 0, 0, 0.3);
+}
+
+/* Node Status Colors */
+.node.secure {
+    background: #4CAF50;
+    box-shadow: 0 0 15px rgba(76, 175, 80, 0.5);
+}
+
+.node.monitoring {
+    background: #2196F3;
+    box-shadow: 0 0 15px rgba(33, 150, 243, 0.5);
+}
+
+.node.compromised {
+    background: #f44336;
+    box-shadow: 0 0 15px rgba(244, 67, 54, 0.5);
+}
+
+.node.infected {
+    background: #ff9800;
+    box-shadow: 0 0 15px rgba(255, 152, 0, 0.5);
+}
+
+.node.vulnerable {
+    background: #ffeb3b;
+    box-shadow: 0 0 15px rgba(255, 235, 59, 0.5);
+}
+
+.node:hover {
+    transform: scale(1.1);
+    z-index: 100;
+}
+
+.node.visited {
+    background: #000000 !important;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.7) !important;
+    color: #ffffff;
+}
+
+.node.visited .node-ip,
+.node.visited .node-status {
+    color: #ffffff;
+}
+
+.node.current {
+    animation: pulse 1s infinite;
+}
+
+/* Edge Styles */
+.edge {
+    position: absolute;
+    background: var(--border-color);
+    height: 2px;
+    transform-origin: left center;
+    pointer-events: none;
+}
+
+.edge.normal {
+    background: #4CAF50;
+}
+
+.edge.suspicious {
+    background: #ffeb3b;
+}
+
+.edge.compromised {
+    background: #f44336;
+}
+
+.edge.vulnerable {
+    background: #ff9800;
+}
+
+.edge.active {
+    animation: flow 1s linear infinite;
+}
+
+.edge-label {
+    position: absolute;
+    top: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.7);
+    padding: 0.1rem 0.3rem;
+    border-radius: 0.25rem;
+    font-size: 0.7rem;
+    color: var(--text-primary);
+    white-space: nowrap;
+}
+
+/* Animations */
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+@keyframes flow {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 100% 50%; }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsive Design */
+@media (max-width: 992px) {
+    .simulation-area {
+        grid-template-columns: 1fr;
+        height: auto;
+    }
+
+    .graph-container {
+        height: 500px;
+    }
+
+    .simulation-log {
+        height: 300px;
+    }
+
+    .node {
+        width: 60px;
+        height: 60px;
+    }
+} 

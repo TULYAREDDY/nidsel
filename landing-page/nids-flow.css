@@ -1,0 +1,243 @@
+/* NIDS Flow Visualization Styles */
+
+/* Container for the flow sections */
+.flow-container {
+    padding-top: 100px;
+    min-height: 100vh;
+    display: flex; /* Use flexbox for single column */
+    flex-direction: column; /* Stack items vertically */
+    align-items: center; /* Center items horizontally */
+    gap: 2rem;
+    padding: 2rem;
+    background: var(--background-dark);
+}
+
+/* Individual flow section (e.g., Live Alert Processing, Simulation) */
+.flow-section {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 1rem;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    align-items: center;
+}
+
+.flow-section h2 {
+    color: var(--text-primary);
+    font-size: 1.75rem;
+    margin-bottom: 0.5rem;
+}
+
+.flow-section p {
+    color: var(--text-secondary);
+    font-size: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+/* Diagram area containing nodes and arrows */
+.flow-diagram {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    flex-wrap: wrap; /* Allow wrapping on smaller screens */
+    justify-content: center;
+}
+
+/* Individual node representing a component */
+.flow-node {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    width: 180px; /* Fixed width for nodes */
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.flow-node:hover {
+    transform: translateY(-5px);
+    border-color: var(--primary-color);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+.flow-node i {
+    font-size: 3rem;
+    color: var(--primary-color);
+    margin-bottom: 0.75rem;
+}
+
+.flow-node h3 {
+    color: var(--text-primary);
+    font-size: 1.1rem;
+    margin-bottom: 0.25rem;
+}
+
+.flow-node p {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+/* Arrows connecting the nodes */
+.flow-arrow {
+    width: 40px; /* Width of the arrow */
+    height: 2px;
+    background: var(--border-color);
+    position: relative;
+}
+
+.flow-arrow::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: -10px; /* Position the arrow head */
+    transform: translateY(-50%) rotate(45deg);
+    width: 10px;
+    height: 10px;
+    border-top: 2px solid var(--border-color);
+    border-right: 2px solid var(--border-color);
+}
+
+/* Data Packet Animation */
+.data-packet {
+    width: 12px;
+    height: 12px;
+    background: var(--primary-color);
+    border-radius: 50%;
+    position: absolute;
+    top: calc(50% - 6px); /* Center vertically */
+    left: -6px; /* Start just before the arrow */
+    z-index: 2;
+    opacity: 0;
+}
+
+@keyframes movePacketHorizontal {
+    0% { left: -6px; opacity: 0.8; transform: scale(0.8); }
+    50% { transform: scale(1.1); }
+    100% { left: calc(100% - 6px); opacity: 0.8; transform: scale(0.8); }
+}
+
+@keyframes movePacketVertical {
+    0% { top: -6px; opacity: 0.8; transform: scale(0.8); }
+    50% { transform: scale(1.1); }
+    100% { top: calc(100% - 6px); opacity: 0.8; transform: scale(0.8); }
+}
+
+@keyframes websocketPulse {
+    0% { box-shadow: 0 0 0 0 rgba(0, 255, 255, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(0, 255, 255, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(0, 255, 255, 0); }
+}
+
+.websocket-active {
+    animation: websocketPulse 2s infinite;
+    border: 2px solid var(--primary-color);
+}
+
+.websocket-packet {
+    background: linear-gradient(45deg, var(--primary-color), #00ff9d);
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+}
+
+/* Status message area */
+.flow-status {
+    margin-top: 1.5rem;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.9rem;
+    width: 100%;
+    text-align: center;
+}
+
+.flow-status.system-initialized {
+    background: rgba(0, 255, 255, 0.1);
+    border: 1px solid rgba(0, 255, 255, 0.3);
+    color: var(--primary-color);
+}
+
+/* Common Controls Area */
+.common-controls {
+    text-align: center;
+    margin-top: 2rem;
+    padding-bottom: 2rem;
+}
+
+/* Improved Log Box Styling */
+.log-box {
+    background: rgba(0, 0, 0, 0.3); /* Slightly darker background */
+    border: 1px solid rgba(0, 255, 255, 0.2); /* Softer border */
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-top: 1.5rem; /* Space from elements above */
+    height: 200px; /* Increased height */
+    overflow-y: auto; /* Enable scrolling */
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.85rem; /* Slightly smaller font */
+    color: var(--primary-color); /* Use primary color for log text */
+    white-space: pre-wrap; /* Preserve whitespace and wrap text */
+    word-wrap: break-word; /* Break long words */
+    width: 100%; /* Make log box take full width of its container */
+    max-width: 800px; /* Limit max width for better readability */
+    margin-left: auto; /* Center the log box */
+    margin-right: auto; /* Center the log box */
+}
+
+.log-box p {
+    margin-bottom: 0.5rem;
+    line-height: 1.4;
+    display: flex;
+    align-items: flex-start;
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.log-box p i {
+    margin-right: 0.75rem; /* Space between icon and text */
+    font-size: 1rem; /* Icon size */
+    color: var(--text-secondary); /* Icon color */
+}
+
+.log-box p:last-child {
+    margin-bottom: 0; /* No margin for the last entry */
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+    .flow-container {
+        flex-direction: column; /* Ensure column direction on small screens */
+    }
+
+    .flow-diagram {
+        flex-direction: column;
+    }
+
+    .flow-arrow {
+        width: 2px;
+        height: 40px; /* Height of the arrow when stacked */
+        background: var(--border-color);
+        position: relative;
+    }
+
+    .flow-arrow::after {
+        content: '';
+        position: absolute;
+        top: auto; /* Reset top positioning */
+        right: 50%;
+        bottom: -10px; /* Position the arrow head */
+        transform: translateX(50%) rotate(135deg); /* Rotate for downward arrow */
+        width: 10px;
+        height: 10px;
+        border-top: 2px solid var(--border-color);
+        border-right: 2px solid var(--border-color);
+    }
+} 

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NIDS - DAA Concepts Simulation</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="daa-simulation.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <span class="highlight">N</span>IDS
+            </div>
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="simulation.html">Network</a>
+                <a href="nids-flow.html">Data Flow</a>
+                <a href="daa-simulation.html" class="active">DAA Concepts</a>
+                
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="daa-container">
+        <div class="daa-section">
+            <h2>DAA Concepts in Network Security</h2>
+            <p>Visualizing key algorithms used in network intrusion detection and analysis.</p>
+            
+            <div class="algorithm-controls">
+                <select id="algorithmSelect" class="algorithm-select">
+                    <option value="dijkstra">Dijkstra's Algorithm (Shortest Path)</option>
+                    <option value="dfs">DFS (Attack Propagation)</option>
+                    <option value="bfs">BFS (Network Exploration)</option>
+                    <option value="knapsack">Knapsack (Alert Prioritization)</option>
+                </select>
+                <button id="startSimulation" class="primary-btn">
+                    <i class="fas fa-play"></i> Start Simulation
+                </button>
+                <button id="resetSimulation" class="secondary-btn" disabled>
+                    <i class="fas fa-redo"></i> Reset
+                </button>
+            </div>
+
+            <div class="simulation-area">
+                <div class="graph-container" id="graphContainer">
+                    <!-- Graph will be rendered here -->
+                </div>
+                <div class="simulation-log">
+                    <h3><i class="fas fa-terminal"></i> Simulation Log</h3>
+                    <div class="log-box" id="simulationLog">
+                        <!-- Log entries will be added here with icons -->
+                        <div class="log-entry info">
+                            <i class="fas fa-info-circle"></i>
+                            <div class="log-content">
+                                <div class="timestamp">[12:00:00]</div>
+                                <div class="message">Simulation initialized. Select an algorithm to begin.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="daa-simulation.js"></script>
+</body>
+</html> 
