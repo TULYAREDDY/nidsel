@@ -57,7 +57,7 @@ http://127.0.0.1:5000
  ```
 landing-page/index.html
 ```
-
+4. Click on live demo for real time usage and attack simulation & click on learn more to watch simulations of different componenets utilized.
 4. Use the dashboard to:
    - Monitor network traffic
    - View attack distributions
