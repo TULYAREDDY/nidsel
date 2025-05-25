@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced IDS ML Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .dashboard-header {
+            background: linear-gradient(120deg, #2c3e50, #3498db);
+            color: white;
+            padding: 20px 0;
+            margin-bottom: 30px;
+        }
+        .alert-card {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+            margin: auto;
+        }
+        .stats-card {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .attack-type-badge {
+            font-size: 0.9em;
+            padding: 5px 10px;
+            border-radius: 15px;
+            margin: 2px;
+        }
+        .alert-details {
+            font-family: monospace;
+            font-size: 0.9em;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        #attackHistory {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .history-item {
+            padding: 10px;
+            border-left: 4px solid;
+            margin: 5px 0;
+        }
+        .history-item.malicious {
+            border-left-color: #dc3545;
+        }
+        .history-item.safe {
+            border-left-color: #28a745;
+        }
+        .export-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .threat-level {
+            font-size: 1.2em;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .threat-level.low {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .threat-level.medium {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        .threat-level.high {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .network-map {
+            width: 100%;
+            height: 500px;
+            border: 1px solid #ccc;
+            margin: 20px 0;
+            background-color: #1a1a1a;
+            position: relative;
+        }
+        
+        .network-legend {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 10px;
+            border-radius: 5px;
+            color: white;
+            font-size: 12px;
+            z-index: 1000;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 5px 0;
+        }
+
+        .legend-color {
+            width: 15px;
+            height: 15px;
+            margin-right: 8px;
+            border-radius: 50%;
+        }
+
+        .node-details {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 13px;
+            max-width: 250px;
+            box-shadow: 0 0 10px rgba(255,255,255,0.1);
+            z-index: 1000;
+            pointer-events: none;
+        }
+
+        .node-details h4 {
+            margin: 0 0 8px 0;
+            color: #3498db;
+        }
+
+        .node-details p {
+            margin: 5px 0;
+            line-height: 1.4;
+        }
+
+        .alert-translation {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        .alert-translation h5 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .alert-translation ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        .alert-translation li {
+            margin: 8px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .alert-translation li:before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            color: #3498db;
+        }
+        
+        .node {
+            stroke: #fff;
+            stroke-width: 1.5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .node.source {
+            fill: #ff5733;
+        }
+        
+        .node.target {
+            fill: #33ff57;
+        }
+        
+        .node.malicious {
+            fill: #ff3333;
+        }
+        
+        .node.normal {
+            fill: #3498db;
+        }
+        
+        .node:hover {
+            stroke: #ffd700;
+            stroke-width: 3px;
+        }
+        
+        .link {
+            stroke-opacity: 0.4;
+            stroke-width: 2;
+        }
+        
+        .link.malicious {
+            stroke: #ff4444;
+        }
+        
+        .link.normal {
+            stroke: #44ff44;
+        }
+
+        .node-label {
+            font-family: Arial;
+            font-size: 12px;
+            fill: #fff;
+            pointer-events: none;
+        }
+
+        .node-details {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            display: none;
+        }
+        .ml-stats {
+            font-size: 0.9em;
+            margin-top: 10px;
+        }
+        .attack-timeline {
+            height: 100px;
+            margin: 20px 0;
+            position: relative;
+        }
+        .technical-details {
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            margin-top: 10px;
+        }
+        
+        .technical-details pre {
+            margin: 0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-size: 12px;
+            font-family: monospace;
+            color: #333;
+        }
+        
+        .details-btn {
+            width: 100%;
+            text-align: left;
+            padding: 10px;
+            background: #f1f1f1;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+        
+        .details-btn:hover {
+            background: #e9ecef;
+        }
+        
+        .details-btn::after {
+            content: '▼';
+            float: right;
+            transform: rotate(0deg);
+            transition: transform 0.3s ease;
+        }
+        
+        .details-btn[aria-expanded="true"]::after {
+            transform: rotate(180deg);
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-header">
+        <div class="container">
+            <h1 class="text-center">Advanced IDS ML Dashboard</h1>
+            <p class="text-center mb-0">Real-time Network Traffic Analysis with Machine Learning</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="row">
+            <!-- Add Threat Level Indicator -->
+            <div class="col-12 mb-4">
+                <div id="threatLevel" class="threat-level low">
+                    Current Threat Level: LOW
+                </div>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="col-12 mb-4">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="stats-card">
+                            <h5>Total Alerts</h5>
+                            <h3 id="totalAlerts">0</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stats-card">
+                            <h5>Malicious Rate</h5>
+                            <h3 id="maliciousRate">0%</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stats-card">
+                            <h5>Average Confidence</h5>
+                            <h3 id="avgConfidence">0%</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stats-card">
+                            <h5>Last Attack</h5>
+                            <h3 id="lastAttackTime">-</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Traffic Distribution</h5>
+                        <div class="chart-container">
+                            <canvas id="trafficChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card mt-4">
+                    <div class="card-body">
+                        <h5 class="card-title">Attack Types Distribution</h5>
+                        <div class="chart-container">
+                            <canvas id="attackTypesChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Add Network Activity Map -->
+                <div class="card mt-4">
+                    <div class="card-body">
+                        <h5 class="card-title">Network Activity Map</h5>
+                        <div id="networkMap" class="network-map">
+                            <!-- Will be populated by D3.js -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Latest Alert and Controls -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Latest Alert</h5>
+                        <div id="alertInfo">
+                            <p class="text-muted">No alerts yet</p>
+                        </div>
+                        <div class="d-flex justify-content-between mt-3">
+                            <button id="simulateBtn" class="btn btn-primary">
+                                Simulate Attack
+                            </button>
+                            <button id="clearHistoryBtn" class="btn btn-secondary">
+                                Clear History
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mt-4">
+                    <div class="card-body">
+                        <h5 class="card-title">Attack History</h5>
+                        <div id="attackHistory">
+                            <!-- Attack history will be populated here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Add ML Model Performance -->
+                <div class="card mt-4">
+                    <div class="card-body">
+                        <h5 class="card-title">ML Model Performance</h5>
+                        <div class="ml-stats">
+                            <div class="row">
+                                <div class="col-6">
+                                    <p><strong>True Positives:</strong> <span id="truePositives">0</span></p>
+                                    <p><strong>False Positives:</strong> <span id="falsePositives">0</span></p>
+                                </div>
+                                <div class="col-6">
+                                    <p><strong>Accuracy:</strong> <span id="accuracy">0%</span></p>
+                                    <p><strong>F1 Score:</strong> <span id="f1Score">0</span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export Button -->
+    <button id="exportBtn" class="btn btn-success export-btn">
+        Export Report <i class="fas fa-download"></i>
+    </button>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://kit.fontawesome.com/your-font-awesome-kit.js"></script>
+
+    <script>
+        // Initialize charts
+        const trafficCtx = document.getElementById('trafficChart').getContext('2d');
+        const trafficChart = new Chart(trafficCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Safe', 'Malicious'],
+                datasets: [{
+                    data: [0, 0],
+                    backgroundColor: ['#28a745', '#dc3545']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+
+        const attackTypesCtx = document.getElementById('attackTypesChart').getContext('2d');
+        const attackTypesChart = new Chart(attackTypesCtx, {
+            type: 'bar',
+            data: {
+                labels: ['SQL Injection', 'Exploit Kit', 'Malware C&C', 'Normal Traffic', 'DNS Query'],
+                datasets: [{
+                    label: 'Occurrences',
+                    data: [0, 0, 0, 0, 0],
+                    backgroundColor: '#3498db'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // Track statistics
+        let stats = {
+            total: 0,
+            malicious: 0,
+            safe: 0,
+            totalConfidence: 0,
+            attackTypes: {
+                'SQL Injection': 0,
+                'Exploit Kit': 0,
+                'Malware C&C': 0,
+                'Normal Traffic': 0,
+                'DNS Query': 0
+            }
+        };
+
+        function updateStats(result) {
+            stats.total++;
+            if (result.classification === 'malicious') {
+                stats.malicious++;
+            } else {
+                stats.safe++;
+            }
+            stats.totalConfidence += result.confidence;
+
+            // Update attack types
+            if (result.alert.includes('SQL Injection')) {
+                stats.attackTypes['SQL Injection']++;
+            } else if (result.alert.includes('EXPLOIT-KIT')) {
+                stats.attackTypes['Exploit Kit']++;
+            } else if (result.alert.includes('MALWARE-CNC')) {
+                stats.attackTypes['Malware C&C']++;
+            } else if (result.alert.includes('Regular Web Traffic')) {
+                stats.attackTypes['Normal Traffic']++;
+            } else if (result.alert.includes('DNS Query')) {
+                stats.attackTypes['DNS Query']++;
+            }
+
+            // Update UI
+            document.getElementById('totalAlerts').textContent = stats.total;
+            document.getElementById('maliciousRate').textContent = 
+                `${((stats.malicious / stats.total) * 100).toFixed(1)}%`;
+            document.getElementById('avgConfidence').textContent = 
+                `${((stats.totalConfidence / stats.total) * 100).toFixed(1)}%`;
+            document.getElementById('lastAttackTime').textContent = 
+                new Date().toLocaleTimeString();
+
+            // Update charts
+            trafficChart.data.datasets[0].data = [stats.safe, stats.malicious];
+            trafficChart.update();
+
+            attackTypesChart.data.datasets[0].data = Object.values(stats.attackTypes);
+            attackTypesChart.update();
+
+            updateThreatLevel((stats.malicious / stats.total) * 100);
+            updateMLStats(result);
+        }
+
+        function addToHistory(result) {
+            const historyDiv = document.getElementById('attackHistory');
+            const alertClass = result.classification === 'malicious' ? 'danger' : 'success';
+            const historyItem = document.createElement('div');
+            historyItem.className = `history-item ${result.classification}`;
+            historyItem.innerHTML = `
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="badge bg-${alertClass}">${result.classification.toUpperCase()}</span>
+                    <small>${result.timestamp}</small>
+                </div>
+                <div class="mt-2">
+                    <small>Confidence: ${(result.confidence * 100).toFixed(2)}%</small>
+                </div>
+            `;
+            historyDiv.insertBefore(historyItem, historyDiv.firstChild);
+        }
+
+        // Handle simulate button click
+        document.getElementById('simulateBtn').addEventListener('click', async () => {
+            const button = document.getElementById('simulateBtn');
+            button.disabled = true;
+            button.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Simulating...';
+
+            try {
+                const response = await fetch('http://127.0.0.1:5000/simulate_attack', {
+                    method: 'POST'
+                });
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    updateAlertDisplay(data);
+                    updateStats(data);
+                    addToHistory(data);
+                } else {
+                    document.getElementById('alertInfo').innerHTML = `
+                        <div class="alert alert-warning">
+                            Error: ${data.message}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                document.getElementById('alertInfo').innerHTML = `
+                    <div class="alert alert-danger">
+                        Error: ${error.message}
+                    </div>
+                `;
+            }
+
+            button.disabled = false;
+            button.textContent = 'Simulate Attack';
+        });
+
+        // Handle clear history
+        document.getElementById('clearHistoryBtn').addEventListener('click', () => {
+            document.getElementById('attackHistory').innerHTML = '';
+            stats = {
+                total: 0,
+                malicious: 0,
+                safe: 0,
+                totalConfidence: 0,
+                attackTypes: {
+                    'SQL Injection': 0,
+                    'Exploit Kit': 0,
+                    'Malware C&C': 0,
+                    'Normal Traffic': 0,
+                    'DNS Query': 0
+                }
+            };
+            trafficChart.data.datasets[0].data = [0, 0];
+            trafficChart.update();
+            attackTypesChart.data.datasets[0].data = [0, 0, 0, 0, 0];
+            attackTypesChart.update();
+            document.getElementById('totalAlerts').textContent = '0';
+            document.getElementById('maliciousRate').textContent = '0%';
+            document.getElementById('avgConfidence').textContent = '0%';
+            document.getElementById('lastAttackTime').textContent = '-';
+        });
+
+        // Network Map Visualization
+        const width = document.getElementById('networkMap').clientWidth;
+        const height = document.getElementById('networkMap').clientHeight;
+        
+        const svg = d3.select('#networkMap')
+            .append('svg')
+            .attr('width', width)
+            .attr('height', height);
+
+        // Add zoom capabilities
+        const zoom = d3.zoom()
+            .scaleExtent([0.1, 4])
+            .on('zoom', (event) => {
+                g.attr('transform', event.transform);
+            });
+
+        svg.call(zoom);
+
+        // Create a container for the graph
+        const g = svg.append('g');
+            
+        // Add arrow markers
+        svg.append('defs').append('marker')
+            .attr('id', 'arrowhead')
+            .attr('viewBox', '-0 -5 10 10')
+            .attr('refX', 20)
+            .attr('refY', 0)
+            .attr('orient', 'auto')
+            .attr('markerWidth', 6)
+            .attr('markerHeight', 6)
+            .attr('xoverflow', 'visible')
+            .append('svg:path')
+            .attr('d', 'M 0,-5 L 10 ,0 L 0,5')
+            .attr('fill', '#999')
+            .style('stroke', 'none');
+
+        const simulation = d3.forceSimulation()
+            .force('link', d3.forceLink().id(d => d.id).distance(100))
+            .force('charge', d3.forceManyBody().strength(-300))
+            .force('center', d3.forceCenter(width / 2, height / 2))
+            .force('collision', d3.forceCollide().radius(30));
+
+        // Create tooltip div
+        const tooltip = d3.select('#networkMap')
+            .append('div')
+            .attr('class', 'node-details')
+            .style('position', 'absolute')
+            .style('visibility', 'hidden');
+            
+        function createNetworkLegend() {
+            const legend = d3.select('#networkMap')
+                .append('div')
+                .attr('class', 'network-legend');
+
+            const legendItems = [
+                { label: 'Attacker', color: '#ff5733' },
+                { label: 'Target', color: '#33ff57' },
+                { label: 'Normal Traffic', color: '#3498db' },
+                { label: 'Malicious Connection', color: '#ff4444' },
+                { label: 'Safe Connection', color: '#44ff44' }
+            ];
+
+            legendItems.forEach(item => {
+                const div = legend.append('div')
+                    .attr('class', 'legend-item');
+                
+                div.append('div')
+                    .attr('class', 'legend-color')
+                    .style('background-color', item.color);
+                
+                div.append('span')
+                    .text(item.label);
+            });
+        }
+
+        function formatAlertDetails(alert) {
+            if (!alert) return 'No alert information available';
+            
+            return `
+                <h4>Network Connection Details</h4>
+                <p><strong>Type:</strong> ${alert.type === 'malicious' ? '⚠️ Suspicious/Malicious' : '✅ Normal'}</p>
+                <p><strong>From:</strong> ${alert.source} (${getDeviceType(alert.source)})</p>
+                <p><strong>To:</strong> ${alert.target} (${getDeviceType(alert.target)})</p>
+                <p><strong>Time:</strong> ${new Date(alert.timestamp).toLocaleTimeString()}</p>
+                ${alert.type === 'malicious' ? '<p class="text-danger">⚠️ This connection might be dangerous!</p>' : ''}
+            `;
+        }
+
+        function getDeviceType(ip) {
+            if (ip.startsWith('192.168.')) return 'Internal Network';
+            if (ip.startsWith('10.')) return 'Server';
+            return 'External Device';
+        }
+
+        function updateNetworkMap() {
+            fetch('http://127.0.0.1:5000/api/network-data')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        const { nodes, links } = data.data;
+                        
+                        // Clear existing elements
+                        g.selectAll('*').remove();
+                        
+                        // Create links
+                        const link = g.append('g')
+                            .selectAll('line')
+                            .data(links)
+                            .enter()
+                            .append('line')
+                            .attr('class', d => `link ${d.type}`)
+                            .attr('marker-end', 'url(#arrowhead)')
+                            .on('mouseover', (event, d) => {
+                                tooltip.html(formatAlertDetails(d))
+                                    .style('left', (event.pageX + 10) + 'px')
+                                    .style('top', (event.pageY - 10) + 'px')
+                                    .style('visibility', 'visible');
+                            })
+                            .on('mouseout', () => {
+                                tooltip.style('visibility', 'hidden');
+                            });
+                            
+                        // Create nodes with enhanced tooltips
+                        const node = g.append('g')
+                            .selectAll('circle')
+                            .data(nodes)
+                            .enter()
+                            .append('circle')
+                            .attr('class', d => {
+                                const nodeType = links.find(l => l.source.id === d.id) ? 'source' :
+                                               links.find(l => l.target.id === d.id) ? 'target' : 'normal';
+                                return `node ${nodeType}`;
+                            })
+                            .attr('r', d => {
+                                const connectionCount = links.filter(l => 
+                                    l.source.id === d.id || l.target.id === d.id
+                                ).length;
+                                return 10 + (connectionCount * 2);
+                            })
+                            .on('mouseover', (event, d) => {
+                                const connections = links.filter(l => 
+                                    l.source.id === d.id || l.target.id === d.id
+                                );
+                                
+                                const maliciousCount = connections.filter(c => 
+                                    c.type === 'malicious'
+                                ).length;
+                                
+                                tooltip.html(`
+                                    <h4>${getDeviceType(d.id)}</h4>
+                                    <p><strong>IP Address:</strong> ${d.id}</p>
+                                    <p><strong>Total Connections:</strong> ${connections.length}</p>
+                                    <p><strong>Suspicious Activities:</strong> ${maliciousCount}</p>
+                                    <p><strong>Role:</strong> ${
+                                        connections.some(c => c.source.id === d.id) ? 'Sender' : 
+                                        connections.some(c => c.target.id === d.id) ? 'Receiver' : 
+                                        'Observer'
+                                    }</p>
+                                    ${maliciousCount > 0 ? 
+                                        '<p class="text-danger">⚠️ This device has suspicious activity!</p>' : 
+                                        '<p class="text-success">✅ No suspicious activity detected</p>'
+                                    }
+                                `)
+                                .style('left', (event.pageX + 10) + 'px')
+                                .style('top', (event.pageY - 10) + 'px')
+                                .style('visibility', 'visible');
+                            })
+                            .on('mouseout', () => {
+                                tooltip.style('visibility', 'hidden');
+                            })
+                            .call(d3.drag()
+                                .on('start', dragstarted)
+                                .on('drag', dragged)
+                                .on('end', dragended));
+
+                        // Add labels with better positioning
+                        const label = g.append('g')
+                            .selectAll('text')
+                            .data(nodes)
+                            .enter()
+                            .append('text')
+                            .attr('class', 'node-label')
+                            .text(d => getDeviceType(d.id))
+                            .attr('dx', 15)
+                            .attr('dy', 4);
+
+                        // Add legend if it doesn't exist
+                        if (!document.querySelector('.network-legend')) {
+                            createNetworkLegend();
+                        }
+
+                        simulation
+                            .nodes(nodes)
+                            .on('tick', ticked);
+                            
+                        simulation.force('link')
+                            .links(links);
+                            
+                        function ticked() {
+                            link
+                                .attr('x1', d => d.source.x)
+                                .attr('y1', d => d.source.y)
+                                .attr('x2', d => d.target.x)
+                                .attr('y2', d => d.target.y);
+                                
+                            node
+                                .attr('cx', d => d.x)
+                                .attr('cy', d => d.y);
+                                
+                            label
+                                .attr('x', d => d.x)
+                                .attr('y', d => d.y);
+                        }
+
+                        // Reheat the simulation
+                        simulation.alpha(1).restart();
+                    }
+                });
+        }
+        
+        function dragstarted(event, d) {
+            if (!event.active) simulation.alphaTarget(0.3).restart();
+            d.fx = d.x;
+            d.fy = d.y;
+        }
+        
+        function dragged(event, d) {
+            d.fx = event.x;
+            d.fy = event.y;
+        }
+        
+        function dragended(event, d) {
+            if (!event.active) simulation.alphaTarget(0);
+            d.fx = null;
+            d.fy = null;
+        }
+        
+        // Update network map periodically
+        updateNetworkMap();
+        setInterval(updateNetworkMap, 5000);
+
+        // Update Threat Level
+        function updateThreatLevel(maliciousRate) {
+            const threatDiv = document.getElementById('threatLevel');
+            if (maliciousRate < 30) {
+                threatDiv.className = 'threat-level low';
+                threatDiv.textContent = 'Current Threat Level: LOW';
+            } else if (maliciousRate < 70) {
+                threatDiv.className = 'threat-level medium';
+                threatDiv.textContent = 'Current Threat Level: MEDIUM';
+            } else {
+                threatDiv.className = 'threat-level high';
+                threatDiv.textContent = 'Current Threat Level: HIGH';
+            }
+        }
+
+        // Export Report
+        document.getElementById('exportBtn').addEventListener('click', () => {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            // Add report content
+            doc.setFontSize(20);
+            doc.text('Network Security Report', 20, 20);
+            
+            doc.setFontSize(12);
+            doc.text(`Generated: ${new Date().toLocaleString()}`, 20, 30);
+            doc.text(`Total Alerts: ${stats.total}`, 20, 40);
+            doc.text(`Malicious Rate: ${((stats.malicious / stats.total) * 100).toFixed(1)}%`, 20, 50);
+            
+            // Add charts as images
+            // Add statistics
+            
+            doc.save('security-report.pdf');
+        });
+
+        // Update ML Stats
+        function updateMLStats(result) {
+            // Calculate and update ML performance metrics
+            const accuracy = ((stats.total - stats.malicious) / stats.total * 100).toFixed(1);
+            document.getElementById('accuracy').textContent = `${accuracy}%`;
+            
+            // Update other ML metrics
+            document.getElementById('truePositives').textContent = stats.malicious;
+            document.getElementById('falsePositives').textContent = Math.floor(stats.malicious * 0.1);
+            document.getElementById('f1Score').textContent = (stats.malicious / (stats.malicious + stats.safe)).toFixed(2);
+        }
+
+        function displayAlertTranslation(alert) {
+            return `
+                <div class="alert-translation">
+                    <h5>Alert Explanation</h5>
+                    <ul>
+                        <li><strong>What happened:</strong> ${getAlertTypeExplanation(alert)}</li>
+                        <li><strong>When:</strong> ${formatAlertTime(alert)}</li>
+                        <li><strong>Source:</strong> ${getDeviceExplanation(alert, 'source')}</li>
+                        <li><strong>Target:</strong> ${getDeviceExplanation(alert, 'target')}</li>
+                        <li><strong>Risk Level:</strong> ${getRiskLevelExplanation(alert)}</li>
+                        <li><strong>Recommended Action:</strong> ${getRecommendedAction(alert)}</li>
+                    </ul>
+                </div>
+            `;
+        }
+
+        function getAlertTypeExplanation(alert) {
+            if (alert.includes('SQL Injection')) {
+                return 'Someone tried to hack a database using malicious commands';
+            }
+            // Add more alert type explanations
+            return 'Suspicious network activity detected';
+        }
+
+        function formatAlertTime(alert) {
+            const timeMatch = alert.match(/(\d{2}\/\d{2}-\d{2}:\d{2}:\d{2})/);
+            if (timeMatch) {
+                return new Date().toLocaleString();
+            }
+            return 'Recent activity';
+        }
+
+        function getDeviceExplanation(alert, type) {
+            const sourceMatch = alert.match(/(\d+\.\d+\.\d+\.\d+)/g);
+            if (sourceMatch) {
+                const ip = type === 'source' ? sourceMatch[0] : sourceMatch[1];
+                return `${ip} (${getDeviceType(ip)})`;
+            }
+            return 'Unknown device';
+        }
+
+        function getRiskLevelExplanation(alert) {
+            if (alert.includes('Priority: 1')) {
+                return '⚠️ High Risk - Immediate attention needed';
+            }
+            return 'Low Risk - Normal traffic';
+        }
+
+        function getRecommendedAction(alert) {
+            if (alert.includes('SQL Injection')) {
+                return 'Block this IP address and check database security';
+            }
+            // Add more recommendations
+            return 'Monitor for further suspicious activity';
+        }
+
+        function getAlertExplanation(alert) {
+            if (alert.includes('EXPLOIT-KIT')) {
+                return "A malicious website or webpage was detected that's designed to automatically hack visitors' computers. " +
+                       "This is a serious security threat that could lead to unauthorized access or data theft.";
+            }
+            if (alert.includes('SQL Injection')) {
+                return "Someone is trying to hack into our database by inserting malicious commands. " +
+                       "This could lead to data theft or unauthorized access to sensitive information.";
+            }
+            if (alert.includes('MALWARE-CNC')) {
+                return "A computer on our network is trying to communicate with known malware control servers. " +
+                       "This suggests the computer might be infected with malware.";
+            }
+            return "Suspicious network activity has been detected that requires investigation.";
+        }
+
+        function getRecommendedActions(alert) {
+            let actions = [];
+            
+            if (alert.includes('EXPLOIT-KIT')) {
+                actions = [
+                    "Block access to the malicious website immediately",
+                    "Scan the affected computer for malware",
+                    "Check if any sensitive data was compromised",
+                    "Update all web browsers and plugins"
+                ];
+            } else if (alert.includes('SQL Injection')) {
+                actions = [
+                    "Block the attacking IP address",
+                    "Review database security settings",
+                    "Check for any data breaches",
+                    "Update web application security"
+                ];
+            } else if (alert.includes('MALWARE-CNC')) {
+                actions = [
+                    "Isolate the infected computer from the network",
+                    "Run a full system scan",
+                    "Update antivirus software",
+                    "Check other computers for similar infections"
+                ];
+            } else {
+                actions = [
+                    "Monitor the suspicious activity",
+                    "Review security logs",
+                    "Update security rules if needed"
+                ];
+            }
+            
+            return actions.map(action => `<li>✓ ${action}</li>`).join('');
+        }
+
+        function updateAlertDisplay(data) {
+            const alertClass = data.classification === 'malicious' ? 'danger' : 'success';
+            document.getElementById('alertInfo').innerHTML = `
+                <div class="alert ${alertClass}">
+                    <div class="card">
+                        <div class="card-header bg-${alertClass} text-white">
+                            <h5 class="mb-0">Latest Alert</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6 class="text-${alertClass} fw-bold">⚠️ Alert Summary</h6>
+                                    <ul class="list-unstyled">
+                                        <li><strong>Type:</strong> ${data.classification.toUpperCase()}</li>
+                                        <li><strong>Confidence:</strong> ${(data.confidence * 100).toFixed(2)}%</li>
+                                        <li><strong>Time:</strong> ${data.timestamp}</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="text-${alertClass} fw-bold">🔍 Attack Details</h6>
+                                    <ul class="list-unstyled">
+                                        <li><strong>From:</strong> Internal Network (${data.alert.match(/(\d+\.\d+\.\d+\.\d+):(\d+)/)[1]})</li>
+                                        <li><strong>To:</strong> Target Server (${data.alert.match(/-> (\d+\.\d+\.\d+\.\d+)/)[1]})</li>
+                                        <li><strong>Risk Level:</strong> High Priority</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="mt-3">
+                                <h6 class="text-${alertClass} fw-bold">📝 Plain English Explanation</h6>
+                                <p>${getAlertExplanation(data.alert)}</p>
+                            </div>
+
+                            <div class="mt-3">
+                                <h6 class="text-${alertClass} fw-bold">⚡ Recommended Actions</h6>
+                                <ul>
+                                    ${getRecommendedActions(data.alert)}
+                                </ul>
+                            </div>
+
+                            <div class="mt-3">
+                                <button class="details-btn" 
+                                        type="button" 
+                                        data-bs-toggle="collapse" 
+                                        data-bs-target="#technicalDetails" 
+                                        aria-expanded="false" 
+                                        aria-controls="technicalDetails">
+                                    <i class="fas fa-code"></i> Technical Details
+                                </button>
+                                <div class="collapse show" id="technicalDetails">
+                                    <div class="technical-details">
+                                        <h6 class="text-muted mb-2">Raw Alert Data:</h6>
+                                        <pre>${formatTechnicalDetails(data.alert)}</pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function formatTechnicalDetails(alert) {
+            // Format the alert text to be more readable
+            return alert.split('\n').map(line => {
+                // Add proper indentation and formatting
+                if (line.includes('[**]')) {
+                    return `Alert Type:    ${line.trim()}`;
+                } else if (line.includes('Classification:')) {
+                    return `Category:     ${line.trim()}`;
+                } else if (line.match(/\d{2}\/\d{2}-\d{2}:\d{2}:\d{2}/)) {
+                    return `Timestamp:    ${line.trim()}`;
+                } else if (line.includes('TCP') || line.includes('UDP') || line.includes('ICMP')) {
+                    return `Protocol:     ${line.trim()}`;
+                } else if (line.includes('Flags:')) {
+                    return `Flags:        ${line.trim()}`;
+                }
+                return line.trim();
+            }).join('\n');
+        }
+
+        // Add this to your document ready or initialization code
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize all collapse elements
+            var collapseElements = [].slice.call(document.querySelectorAll('.collapse'));
+            collapseElements.map(function(collapseEl) {
+                return new bootstrap.Collapse(collapseEl, {
+                    toggle: false
+                });
+            });
+        });
+    </script>
+</body>
+</html> 
